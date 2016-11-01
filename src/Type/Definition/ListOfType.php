@@ -2,6 +2,7 @@
 namespace GraphQL\Type\Definition;
 
 use GraphQL\Type\DefinitionContainer;
+use GraphQL\Type\TypeResolver;
 use GraphQL\Utils;
 
 /**
@@ -20,6 +21,8 @@ class ListOfType extends Type implements WrappingType, OutputType, InputType
      */
     public function __construct($type)
     {
+        $type = TypeResolver::resolveType($type);
+
         Utils::invariant(
             $type instanceof Type || $type instanceof DefinitionContainer || is_callable($type),
             'Expecting instance of GraphQL\Type\Definition\Type or callable returning instance of that class'

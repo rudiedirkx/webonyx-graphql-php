@@ -1,6 +1,7 @@
 <?php
 namespace GraphQL;
 
+use GraphQL\Type\DefinitionContainer;
 use GraphQL\Type\Definition\AbstractType;
 use GraphQL\Type\Definition\Directive;
 use GraphQL\Type\Definition\InputObjectType;
@@ -9,8 +10,8 @@ use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\UnionType;
 use GraphQL\Type\Definition\WrappingType;
-use GraphQL\Type\DefinitionContainer;
 use GraphQL\Type\Introspection;
+use GraphQL\Type\TypeResolver;
 
 /**
  * Schema Definition
@@ -126,6 +127,8 @@ class Schema
             $config['subscription'] = $config['subscription']->getDefinition();
         }
 
+        $config['query'] = TypeResolver::resolveType($config['query']);
+
         Utils::invariant(
             $config['query'] instanceof ObjectType,
             "Schema query must be Object Type but got: " . Utils::getVariableType($config['query'])
@@ -178,6 +181,7 @@ class Schema
         foreach ($this->typeMap as $typeName => $type) {
             if ($type instanceof ObjectType) {
                 foreach ($type->getInterfaces() as $iface) {
+                    $iface = TypeResolver::resolveType($iface);
                     $this->implementations[$iface->name][] = $type;
                 }
             }
@@ -319,6 +323,8 @@ class Schema
         if ($type instanceof WrappingType) {
             return $this->extractTypes($type->getWrappedType(true));
         }
+
+        $type = TypeResolver::resolveType($type);
 
         if (!empty($this->typeMap[$type->name])) {
             Utils::invariant(

@@ -3,6 +3,7 @@ namespace GraphQL\Type\Definition;
 
 use GraphQL\Error\InvariantViolation;
 use GraphQL\Type\DefinitionContainer;
+use GraphQL\Type\TypeResolver;
 use GraphQL\Utils;
 
 /*
@@ -202,6 +203,8 @@ abstract class Type
         if ($type instanceof DefinitionContainer) {
             $type = $type->getDefinition();
         }
+
+        $type = TypeResolver::resolveType($type);
 
         if (!$type instanceof Type) {
             throw new InvariantViolation(sprintf(
